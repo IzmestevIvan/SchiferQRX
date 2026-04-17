@@ -1,0 +1,72 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Регистрация — SchiferQRX</title>
+  <link rel="stylesheet" href="{% static 'qrapp/css/auth.css' %}">
+</head>
+<body>
+  <div class="auth-orb auth-orb--one"></div>
+  <div class="auth-orb auth-orb--two"></div>
+
+  <div class="auth-floating" aria-hidden="true">
+    <div class="auth-floating__item auth-floating__item--qr auth-floating__item--1"></div>
+    <div class="auth-floating__item auth-floating__item--code auth-floating__item--2">create://cipher-member</div>
+    <div class="auth-floating__item auth-floating__item--qr auth-floating__item--3"></div>
+    <div class="auth-floating__item auth-floating__item--code auth-floating__item--4">01110010 01100101 01100111</div>
+    <div class="auth-floating__item auth-floating__item--qr auth-floating__item--5"></div>
+  </div>
+
+  <main class="auth-page">
+    <section class="auth-card">
+      <p class="auth-brand">SchiferQRX</p>
+      <h1 class="auth-title">Создать аккаунт</h1>
+      <p class="auth-subtitle">Зарегистрируйтесь, чтобы пользоваться закрытым генератором и декодером.</p>
+
+      <form method="post" class="auth-form">
+        {% csrf_token %}
+
+        <div class="auth-field">
+          <label for="id_username">Логин</label>
+          {{ form.username }}
+        </div>
+
+        <div class="auth-field">
+          <label for="id_email">Email</label>
+          {{ form.email }}
+        </div>
+
+        <div class="auth-field">
+          <label for="id_display_name">Имя в сервисе</label>
+          {{ form.display_name }}
+        </div>
+
+        <div class="auth-field">
+          <label for="id_password1">Пароль</label>
+          {{ form.password1 }}
+        </div>
+
+        <div class="auth-field">
+          <label for="id_password2">Повторите пароль</label>
+          {{ form.password2 }}
+        </div>
+
+        {% if form.errors %}
+          <div class="auth-error">
+            {{ form.errors }}
+          </div>
+        {% endif %}
+
+        <button type="submit" class="auth-button">Зарегистрироваться</button>
+      </form>
+
+      <p class="auth-note">
+        Уже есть аккаунт?
+        <a href="{% url 'login' %}">Войти</a>
+      </p>
+    </section>
+  </main>
+</body>
+</html>

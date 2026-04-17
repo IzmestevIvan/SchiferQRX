@@ -1,0 +1,55 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Вход — SchiferQRX</title>
+  <link rel="stylesheet" href="{% static 'qrapp/css/auth.css' %}">
+</head>
+<body>
+  <div class="auth-orb auth-orb--one"></div>
+  <div class="auth-orb auth-orb--two"></div>
+
+  <div class="auth-floating" aria-hidden="true">
+    <div class="auth-floating__item auth-floating__item--qr auth-floating__item--1"></div>
+    <div class="auth-floating__item auth-floating__item--code auth-floating__item--2">cipher://access-layer</div>
+    <div class="auth-floating__item auth-floating__item--qr auth-floating__item--3"></div>
+    <div class="auth-floating__item auth-floating__item--code auth-floating__item--4">01110011 01100011 01101000 01101001</div>
+    <div class="auth-floating__item auth-floating__item--qr auth-floating__item--5"></div>
+  </div>
+
+  <main class="auth-page">
+    <section class="auth-card">
+      <p class="auth-brand">SchiferQRX</p>
+      <h1 class="auth-title">Вход в аккаунт</h1>
+      <p class="auth-subtitle">Войдите, чтобы создавать и извлекать секретные QR-коды.</p>
+
+      <form method="post" class="auth-form">
+        {% csrf_token %}
+
+        <div class="auth-field">
+          <label for="id_username">Логин</label>
+          {{ form.username }}
+        </div>
+
+        <div class="auth-field">
+          <label for="id_password">Пароль</label>
+          {{ form.password }}
+        </div>
+
+        {% if form.errors %}
+          <p class="auth-error">Неверный логин или пароль.</p>
+        {% endif %}
+
+        <button type="submit" class="auth-button">Войти</button>
+      </form>
+
+      <p class="auth-note">
+        Нет аккаунта?
+        <a href="{% url 'register' %}">Создать аккаунт</a>
+      </p>
+    </section>
+  </main>
+</body>
+</html>

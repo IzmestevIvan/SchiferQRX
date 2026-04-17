@@ -1,0 +1,178 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SchiferQRX</title>
+  <link rel="stylesheet" href="{% static 'qrapp/css/style.css' %}">
+</head>
+<body>
+  <div class="bg-orb bg-orb--one"></div>
+  <div class="bg-orb bg-orb--two"></div>
+
+  <div class="floating-layer" aria-hidden="true">
+    <div class="float-card float-card--qr float-card--1"></div>
+    <div class="float-card float-card--code float-card--2">01010011 01100101 01100011 01110010 01100101 01110100</div>
+    <div class="float-card float-card--qr float-card--3"></div>
+    <div class="float-card float-card--code float-card--4">cipher://hidden-message</div>
+    <div class="float-card float-card--qr float-card--5"></div>
+    <div class="float-card float-card--code float-card--6">01101000 01101001 01100100 01100100 01100101 01101110</div>
+    <div class="float-card float-card--qr float-card--7"></div>
+    <div class="float-card float-card--code float-card--8">decrypt(key): layer_02</div>
+    <div class="float-card float-card--qr float-card--9"></div>
+    <div class="float-card float-card--code float-card--10">mask://signal/qrx</div>
+    <div class="float-card float-card--mini float-card--11"></div>
+    <div class="float-card float-card--mini float-card--12"></div>
+    <div class="float-card float-card--mini float-card--13"></div>
+  </div>
+
+  <main class="page">
+    <section class="card">
+      <div class="card__left">
+        <div class="panel-topbar">
+          <p class="eyebrow">SchiferQRX</p>
+
+          <a href="{% url 'profile' %}" class="profile-chip">
+            <div class="profile-chip__avatar">
+              {% if request.user.profile.display_name %}
+                {{ request.user.profile.display_name|slice:":1"|upper }}
+              {% else %}
+                {{ request.user.username|slice:":1"|upper }}
+              {% endif %}
+            </div>
+
+            <div class="profile-chip__meta">
+              <span class="profile-chip__name">
+                {% if request.user.profile.display_name %}
+                  {{ request.user.profile.display_name }}
+                {% else %}
+                  {{ request.user.username }}
+                {% endif %}
+              </span>
+              <span class="profile-chip__role">cipher member</span>
+            </div>
+          </a>
+        </div>
+
+        <h1 class="title">Генератор QR-кодов</h1>
+        <p class="subtitle">
+          Создайте QR с открытым и скрытым сообщением. Обычный сканер увидит только открытый слой,
+          а наше приложение сможет извлечь секретную часть.
+        </p>
+
+        <div class="form-block">
+          <label class="label" for="textInput">Открытый текст</label>
+          <textarea
+            id="textInput"
+            class="textarea"
+            placeholder="То, что увидит обычный QR-сканер"
+          ></textarea>
+
+          <label class="label" for="secretInput">Секретный текст</label>
+          <textarea
+            id="secretInput"
+            class="textarea textarea--secret"
+            placeholder="То, что увидит только специальный декодер"
+          ></textarea>
+
+          <div class="lifetime-card" id="lifetimeCard">
+            <div class="lifetime-card__top">
+              <div>
+                <p class="lifetime-card__title">Срок жизни QR-кода</p>
+                <p class="lifetime-card__subtitle">Можно оставить код бессрочным или задать время жизни в минутах.</p>
+              </div>
+
+              <label class="toggle" for="lifetimeToggle">
+                <input id="lifetimeToggle" class="toggle__input" type="checkbox">
+                <span class="toggle__slider"></span>
+                <span class="toggle__label" id="lifetimeToggleLabel">Бессрочный</span>
+              </label>
+            </div>
+
+            <div class="lifetime-card__controls is-hidden" id="lifetimeControls">
+              <div class="lifetime-presets">
+                <button type="button" class="preset-chip" data-minutes="1">1 мин</button>
+                <button type="button" class="preset-chip" data-minutes="5">5 мин</button>
+                <button type="button" class="preset-chip" data-minutes="15">15 мин</button>
+                <button type="button" class="preset-chip" data-minutes="60">1 час</button>
+                <button type="button" class="preset-chip" data-minutes="1440">1 день</button>
+              </div>
+
+              <div class="lifetime-input-wrap">
+                <input id="lifetimeInput" class="lifetime-input" type="number" min="1" step="1" placeholder="Например, 30">
+                <span class="lifetime-input__suffix">минут</span>
+              </div>
+
+              <p class="lifetime-card__hint" id="lifetimeHint">После истечения срока скрытый слой больше не откроется в приложении.</p>
+            </div>
+          </div>
+
+          <button id="generateBtn" class="button">
+            Сгенерировать QR
+          </button>
+
+          <p id="errorMessage" class="error-message"></p>
+        </div>
+      </div>
+
+      <div class="card__right">
+        <div class="preview">
+          <div class="preview__inner" id="previewInner">
+            <p class="preview__placeholder">Здесь появится ваш QR-код</p>
+          </div>
+
+          <div class="preview-meta" id="previewMeta"></div>
+
+          <div class="preview-actions" id="previewActions">
+            <button id="downloadBtn" class="button button--ghost" type="button" disabled>
+              Скачать QR
+            </button>
+            <button id="sendToDecodeBtn" class="button button--dark" type="button" disabled>
+              Перенести в извлечение
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="decode-card">
+      <div class="decode-card__left">
+        <p class="eyebrow">Decode secret layer</p>
+        <h2 class="section-title">Извлечь скрытый текст</h2>
+        <p class="section-subtitle">
+          Загрузите PNG, созданный в SchiferQRX, и приложение попробует достать встроенное сообщение.
+        </p>
+
+        <div class="form-block">
+          <label class="label" for="decodeInput">Файл с QR-кодом</label>
+          <input id="decodeInput" class="file-input" type="file" accept="image/png,image/jpeg,image/webp">
+
+          <div class="decode-preview" id="decodePreview">
+            <p class="decode-preview__placeholder">
+              Сюда можно загрузить файл или перенести только что созданный QR
+            </p>
+          </div>
+
+          <button id="decodeBtn" class="button button--secondary">
+            Извлечь секрет
+          </button>
+
+          <p id="decodeErrorMessage" class="error-message"></p>
+        </div>
+      </div>
+
+      <div class="decode-card__right">
+        <div class="secret-result" id="secretResult">
+          <p class="secret-result__placeholder">Секретный текст появится здесь</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const csrfToken = "{{ csrf_token }}";
+  </script>
+  <script src="{% static 'qrapp/js/app.js' %}"></script>
+</body>
+</html>

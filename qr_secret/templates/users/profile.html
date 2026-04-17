@@ -1,0 +1,218 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Личный кабинет — SchiferQRX</title>
+  <link rel="stylesheet" href="{% static 'qrapp/css/auth.css' %}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <main class="dashboard-page">
+    <section class="dashboard-shell">
+      <div class="dashboard-hero">
+        <div class="dashboard-hero__main">
+          <div class="dashboard-avatar">
+            {% if profile.display_name %}
+              {{ profile.display_name|slice:":1"|upper }}
+            {% else %}
+              {{ user.username|slice:":1"|upper }}
+            {% endif %}
+          </div>
+
+          <div class="dashboard-hero__meta">
+            <p class="dashboard-brand">SchiferQRX</p>
+            <h1 class="dashboard-title">
+              {% if profile.display_name %}
+                {{ profile.display_name }}
+              {% else %}
+                {{ user.username }}
+              {% endif %}
+            </h1>
+            <p class="dashboard-subtitle">@{{ user.username }} · {{ profile.level_name }}</p>
+            <p class="dashboard-note">
+              В системе с {{ profile.created_at|date:"d.m.Y" }} · Закрытый профиль участника сервиса
+            </p>
+          </div>
+        </div>
+
+        <div class="dashboard-hero__actions">
+          <a class="dashboard-button" href="{% url 'index' %}">Вернуться в генератор</a>
+          <a class="dashboard-button dashboard-button--dark" href="{% url 'logout' %}">Выйти</a>
+        </div>
+      </div>
+
+      <section class="stats-grid">
+        <article class="stat-card">
+          <p class="stat-card__label">Generated</p>
+          <p class="stat-card__value">{{ profile.total_generated }}</p>
+          <p class="stat-card__meta">Всего созданных QR</p>
+        </article>
+
+        <article class="stat-card">
+          <p class="stat-card__label">Decoded</p>
+          <p class="stat-card__value">{{ profile.total_decoded }}</p>
+          <p class="stat-card__meta">Извлечено секретов</p>
+        </article>
+
+        <article class="stat-card">
+          <p class="stat-card__label">Downloads</p>
+          <p class="stat-card__value">{{ profile.total_downloaded }}</p>
+          <p class="stat-card__meta">Скачано QR-файлов</p>
+        </article>
+
+        <article class="stat-card">
+          <p class="stat-card__label">Achievements</p>
+          <p class="stat-card__value">{{ achievement_count }}</p>
+          <p class="stat-card__meta">Открытых достижений</p>
+        </article>
+      </section>
+
+      <section class="dashboard-grid">
+        <article class="dashboard-panel">
+          <div class="panel-head">
+            <div>
+              <p class="panel-kicker">Activity chart</p>
+              <h2 class="panel-title">Активность в сервисе</h2>
+            </div>
+          </div>
+
+          <div class="chart-wrap">
+            <canvas id="activityChart"></canvas>
+          </div>
+        </article>
+
+        <article class="dashboard-panel">
+          <div class="panel-head">
+            <div>
+              <p class="panel-kicker">Achievements</p>
+              <h2 class="panel-title">Ваши достижения</h2>
+            </div>
+          </div>
+
+          <div class="achievements-grid">
+            {% if achievements %}
+              {% for item in achievements %}
+                <div class="achievement-card">
+                  <div class="achievement-card__icon">
+                    {% if item.achievement.icon %}
+                      {{ item.achievement.icon }}
+                    {% else %}
+                      ✦
+                    {% endif %}
+                  </div>
+                  <div class="achievement-card__meta">
+                    <p class="achievement-card__title">{{ item.achievement.title }}</p>
+                    <p class="achievement-card__desc">{{ item.achievement.description }}</p>
+                    <p class="achievement-card__date">{{ item.unlocked_at|date:"d.m.Y" }}</p>
+                  </div>
+                </div>
+              {% endfor %}
+            {% else %}
+              <div class="empty-state">
+                <p class="empty-state__title">Пока нет достижений</p>
+                <p class="empty-state__text">Создавайте, декодируйте и скачивайте QR-коды, чтобы открыть первые бейджи.</p>
+              </div>
+            {% endif %}
+          </div>
+        </article>
+      </section>
+
+      <section class="dashboard-grid dashboard-grid--bottom">
+        <article class="dashboard-panel">
+          <div class="panel-head">
+            <div>
+              <p class="panel-kicker">Account info</p>
+              <h2 class="panel-title">Данные профиля</h2>
+            </div>
+          </div>
+
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-item__label">Логин</span>
+              <span class="info-item__value">{{ user.username }}</span>
+            </div>
+
+            <div class="info-item">
+              <span class="info-item__label">Email</span>
+              <span class="info-item__value">{{ user.email }}</span>
+            </div>
+
+            <div class="info-item">
+              <span class="info-item__label">Имя в сервисе</span>
+              <span class="info-item__value">
+                {% if profile.display_name %}{{ profile.display_name }}{% else %}—{% endif %}
+              </span>
+            </div>
+
+            <div class="info-item">
+              <span class="info-item__label">Уровень</span>
+              <span class="info-item__value">{{ profile.level_name }}</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="dashboard-panel">
+          <div class="panel-head">
+            <div>
+              <p class="panel-kicker">Recent actions</p>
+              <h2 class="panel-title">Последняя активность</h2>
+            </div>
+          </div>
+
+          <div class="activity-list">
+            {% if recent_activities %}
+              {% for activity in recent_activities %}
+                <div class="activity-item">
+                  <div class="activity-item__dot"></div>
+                  <div class="activity-item__meta">
+                    <p class="activity-item__title">{{ activity.get_action_type_display }}</p>
+                    <p class="activity-item__date">{{ activity.created_at|date:"d.m.Y H:i" }}</p>
+                  </div>
+                </div>
+              {% endfor %}
+            {% else %}
+              <div class="empty-state">
+                <p class="empty-state__title">Активности пока нет</p>
+                <p class="empty-state__text">После первых действий здесь появится история использования сервиса.</p>
+              </div>
+            {% endif %}
+          </div>
+        </article>
+      </section>
+    </section>
+  </main>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const chartGenerate = {{ chart_generate }};
+        const chartDecode = {{ chart_decode }};
+        const chartDownload = {{ chart_download }};
+        const ctx = document.getElementById('activityChart');
+        if (ctx) {
+          new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+              labels: ['Generated', 'Decoded', 'Downloads'],
+              datasets: [{
+                data: [chartGenerate, chartDecode, chartDownload],
+                backgroundColor: ['#6F73FF', '#8A5CFF', '#20263A'],
+                borderWidth: 0
+              }]
+            },
+            options: {
+              cutout: '68%',
+              plugins: {
+                legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 10, padding: 18 } }
+              }
+            }
+          });
+        } else {
+          console.error('Canvas element not found');
+        }
+      });
+    </script>
+        
+</body>
+</html>

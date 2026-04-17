@@ -1,0 +1,30 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>500 — SchiferQRX</title>
+  <link rel="stylesheet" href="{% static 'qrapp/css/auth.css' %}">
+</head>
+<body>
+  <div class="auth-orb auth-orb--one"></div>
+  <div class="auth-orb auth-orb--two"></div>
+
+  <main class="auth-page">
+    <section class="auth-card auth-card--wide" style="text-align:center;">
+      <p class="auth-brand">SchiferQRX</p>
+      <h1 class="auth-title">500</h1>
+      <p class="auth-subtitle">
+        Внутри системы произошёл сбой.
+      </p>
+
+      <div style="margin: 22px 0 26px; font-size: 14px; color: #6b7284; line-height: 1.7;">
+        Попробуйте обновить страницу чуть позже.
+      </div>
+
+      <a href="{% url 'index' %}" class="auth-button">Вернуться в сервис</a>
+    </section>
+  </main>
+</body>
+</html>
